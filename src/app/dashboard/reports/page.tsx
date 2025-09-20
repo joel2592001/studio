@@ -8,10 +8,17 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { FinancialSummary } from '@/components/dashboard/reports/financial-summary';
 import { ExpenseCategoryChart } from '@/components/dashboard/reports/expense-category-chart';
 import { useFinancials } from '@/contexts/financial-context';
-import { Transaction } from '@/lib/types';
-import { CalendarIcon, Download } from 'lucide-react';
+import { CalendarIcon, Download, ListFilter } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 
 export default function ReportsPage() {
@@ -20,16 +27,34 @@ export default function ReportsPage() {
         from: undefined,
         to: undefined,
     });
+    const [filters, setFilters] = useState<{ type: string[]; category: string[] }>({
+        type: [],
+        category: [],
+    });
+
+    const uniqueCategories = useMemo(() => {
+        const categories = new Set(state.transactions.map((t) => t.category));
+        return Array.from(categories);
+    }, [state.transactions]);
 
     const filteredTransactions = useMemo(() => {
-        if (!dateRange.from || !dateRange.to) {
-            return state.transactions;
-        }
         return state.transactions.filter(t => {
             const transactionDate = new Date(t.date);
-            return transactionDate >= dateRange.from! && transactionDate <= dateRange.to!;
+            const dateMatch = !dateRange.from || !dateRange.to || (transactionDate >= dateRange.from && transactionDate <= dateRange.to);
+            const typeMatch = filters.type.length === 0 || filters.type.includes(t.type);
+            const categoryMatch = filters.category.length === 0 || filters.category.includes(t.category);
+            return dateMatch && typeMatch && categoryMatch;
         });
-    }, [state.transactions, dateRange]);
+    }, [state.transactions, dateRange, filters]);
+
+    const handleFilterChange = (filterType: 'type' | 'category', value: string) => {
+        setFilters((prev) => {
+          const newValues = prev[filterType].includes(value)
+            ? prev[filterType].filter((v) => v !== value)
+            : [...prev[filterType], value];
+          return { ...prev, [filterType]: newValues };
+        });
+    };
 
     const handleExport = () => {
         const headers = ['ID', 'Type', 'Category', 'Amount', 'Date', 'Description'];
@@ -56,7 +81,7 @@ export default function ReportsPage() {
                         id="date"
                         variant={"outline"}
                         className={cn(
-                        "w-[300px] justify-start text-left font-normal",
+                        "w-full sm:w-[300px] justify-start text-left font-normal",
                         !dateRange.from && "text-muted-foreground"
                         )}
                     >
@@ -86,10 +111,47 @@ export default function ReportsPage() {
                     />
                     </PopoverContent>
                 </Popover>
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <Button variant="outline" size="sm" className="h-10 gap-1">
+                            <ListFilter className="h-3.5 w-3.5" />
+                            <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
+                                Filter
+                            </span>
+                        </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                        <DropdownMenuLabel>Filter by Type</DropdownMenuLabel>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuCheckboxItem
+                            checked={filters.type.includes('income')}
+                            onCheckedChange={() => handleFilterChange('type', 'income')}
+                        >
+                            Income
+                        </DropdownMenuCheckboxItem>
+                        <DropdownMenuCheckboxItem
+                            checked={filters.type.includes('expense')}
+                            onCheckedChange={() => handleFilterChange('type', 'expense')}
+                        >
+                            Expense
+                        </DropdownMenuCheckboxItem>
+                        <DropdownMenuLabel>Filter by Category</DropdownMenuLabel>
+                        <DropdownMenuSeparator />
+                        {uniqueCategories.map(category => (
+                            <DropdownMenuCheckboxItem
+                                key={category}
+                                checked={filters.category.includes(category)}
+                                onCheckedChange={() => handleFilterChange('category', category)}
+                            >
+                                {category}
+                            </DropdownMenuCheckboxItem>
+                        ))}
+                    </DropdownMenuContent>
+                </DropdownMenu>
              </div>
              <Button onClick={handleExport}>
                 <Download className="mr-2 h-4 w-4" />
-                Export All
+                Export
             </Button>
         </div>
         <div className="grid gap-4 md:gap-8 lg:grid-cols-2">
@@ -99,4 +161,3 @@ export default function ReportsPage() {
     </div>
   );
 }
-
