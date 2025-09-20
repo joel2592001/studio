@@ -71,7 +71,7 @@ export function TransactionForm() {
       amount: 0,
       category: '',
       description: '',
-      date: new date().toISOString().split('T')[0],
+      date: new Date().toISOString().split('T')[0],
     },
   });
 
