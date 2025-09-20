@@ -70,7 +70,7 @@ export function OverviewCards() {
           <div className="text-2xl font-bold font-headline">
             {formatCurrency(totalIncome)}
           </div>
-          <p className="text-xs text-muted-foreground">+20.1% from last month</p>
+          <p className="text-xs text-muted-foreground">Your total income</p>
         </CardContent>
       </Card>
       <Card className="shadow-md">
@@ -82,7 +82,7 @@ export function OverviewCards() {
           <div className="text-2xl font-bold font-headline">
             {formatCurrency(totalExpenses)}
           </div>
-          <p className="text-xs text-muted-foreground">+18.1% from last month</p>
+          <p className="text-xs text-muted-foreground">Your total expenses</p>
         </CardContent>
       </Card>
       <Card className="shadow-md">
@@ -106,10 +106,10 @@ export function OverviewCards() {
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold font-headline">
-            {formatCurrency(5423189)}
+            {formatCurrency(savings)}
           </div>
           <p className="text-xs text-muted-foreground">
-            +10.2% from last month
+            Your current net worth
           </p>
         </CardContent>
       </Card>

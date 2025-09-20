@@ -1,6 +1,6 @@
 'use client';
 
-import { Target } from 'lucide-react';
+import { Target, Goal as GoalIcon } from 'lucide-react';
 import {
   Card,
   CardContent,
@@ -52,28 +52,40 @@ export function Goals() {
         <CardDescription>Your progress towards financial goals.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
-        {goalsWithProgress.map((goal) => (
-          <div key={goal.id}>
-            <div className="flex justify-between items-center mb-1">
-              <span className="text-sm font-medium">{goal.name}</span>
-              <span className="text-xs text-muted-foreground">
-                {formatCurrency(goal.currentAmount)} /{' '}
-                {formatCurrency(goal.targetAmount)}
-              </span>
+        {goalsWithProgress.length > 0 ? (
+          goalsWithProgress.map((goal) => (
+            <div key={goal.id}>
+              <div className="flex justify-between items-center mb-1">
+                <span className="text-sm font-medium">{goal.name}</span>
+                <span className="text-xs text-muted-foreground">
+                  {formatCurrency(goal.currentAmount)} /{' '}
+                  {formatCurrency(goal.targetAmount)}
+                </span>
+              </div>
+              <Progress value={goal.progress} className="h-3" />
+              <div className="flex justify-between items-center mt-1">
+                <span className="text-xs text-muted-foreground">
+                  {goal.progress.toFixed(0)}% complete
+                </span>
+                {goal.deadline && (
+                  <span className="text-xs text-muted-foreground">
+                      Deadline: {getDate(goal.deadline)!.toLocaleDateString()}
+                  </span>
+                )}
+              </div>
             </div>
-            <Progress value={goal.progress} className="h-3" />
-            <div className="flex justify-between items-center mt-1">
-              <span className="text-xs text-muted-foreground">
-                {goal.progress.toFixed(0)}% complete
-              </span>
-              {goal.deadline && (
-                 <span className="text-xs text-muted-foreground">
-                    Deadline: {getDate(goal.deadline)!.toLocaleDateString()}
-                 </span>
-              )}
+          ))
+        ) : (
+            <div className="flex h-[150px] flex-col items-center justify-center gap-4 text-center">
+                <GoalIcon className="h-16 w-16 text-muted" />
+                <div className="space-y-1">
+                <h3 className="font-semibold tracking-tight">No goals yet</h3>
+                <p className="text-sm text-muted-foreground">
+                    Create a savings goal to get started.
+                </p>
+                </div>
             </div>
-          </div>
-        ))}
+        )}
       </CardContent>
     </Card>
   );

@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useMemo } from 'react';
@@ -28,7 +27,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useFinancials } from '@/contexts/financial-context';
-import { ListFilter } from 'lucide-react';
+import { ListFilter, FileSearch } from 'lucide-react';
 import { Timestamp } from 'firebase/firestore';
 
 const TRANSACTIONS_PER_PAGE = 10;
@@ -119,100 +118,118 @@ export function AllTransactions() {
                 >
                     Expense
                 </DropdownMenuCheckboxItem>
-                <DropdownMenuLabel>Filter by Category</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                {uniqueCategories.map(category => (
-                     <DropdownMenuCheckboxItem
-                        key={category}
-                        checked={filters.category.includes(category)}
-                        onCheckedChange={() => handleFilterChange('category', category)}
-                    >
-                        {category}
-                    </DropdownMenuCheckboxItem>
-                ))}
+                {uniqueCategories.length > 0 && (
+                    <>
+                        <DropdownMenuLabel>Filter by Category</DropdownMenuLabel>
+                        <DropdownMenuSeparator />
+                        {uniqueCategories.map(category => (
+                            <DropdownMenuCheckboxItem
+                                key={category}
+                                checked={filters.category.includes(category)}
+                                onCheckedChange={() => handleFilterChange('category', category)}
+                            >
+                                {category}
+                            </DropdownMenuCheckboxItem>
+                        ))}
+                    </>
+                )}
             </DropdownMenuContent>
         </DropdownMenu>
       </CardHeader>
       <CardContent>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Description</TableHead>
-              <TableHead className="hidden sm:table-cell">Type</TableHead>
-              <TableHead className="hidden md:table-cell">Category</TableHead>
-              <TableHead className="hidden sm:table-cell">Date</TableHead>
-              <TableHead className="text-right">Amount</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {paginatedTransactions.map((transaction) => (
-              <TableRow key={transaction.id}>
-                <TableCell>
-                  <div className="font-medium">{transaction.description}</div>
-                </TableCell>
-                <TableCell className="hidden sm:table-cell">
-                   <Badge
-                    className="text-xs"
-                    variant={
-                      transaction.type === 'income' ? 'default' : 'secondary'
-                    }
-                    style={{
-                      backgroundColor:
-                        transaction.type === 'income'
-                          ? 'hsl(var(--primary))'
-                          : 'hsl(var(--accent))',
-                      color:
-                        transaction.type === 'income'
-                          ? 'hsl(var(--primary-foreground))'
-                          : 'hsl(var(--accent-foreground))',
-                    }}
-                  >
-                    {transaction.type}
-                  </Badge>
-                </TableCell>
-                <TableCell className="hidden md:table-cell">
-                    {transaction.category}
-                </TableCell>
-                <TableCell className="hidden sm:table-cell">
-                  {getDate(transaction.date).toLocaleDateString()}
-                </TableCell>
-                <TableCell
-                  className={`text-right font-medium ${
-                    transaction.type === 'income'
-                      ? 'text-green-600'
-                      : 'text-red-600'
-                  }`}
-                >
-                  {transaction.type === 'income' ? '+' : '-'}
-                  {formatCurrency(transaction.amount)}
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-        <div className="flex justify-between items-center pt-4">
-            <div className="text-xs text-muted-foreground">
-                Showing <strong>{(currentPage - 1) * TRANSACTIONS_PER_PAGE + 1} - {Math.min(currentPage * TRANSACTIONS_PER_PAGE, filteredTransactions.length)}</strong> of <strong>{filteredTransactions.length}</strong> transactions
+        {filteredTransactions.length > 0 ? (
+            <>
+                <Table>
+                <TableHeader>
+                    <TableRow>
+                    <TableHead>Description</TableHead>
+                    <TableHead className="hidden sm:table-cell">Type</TableHead>
+                    <TableHead className="hidden md:table-cell">Category</TableHead>
+                    <TableHead className="hidden sm:table-cell">Date</TableHead>
+                    <TableHead className="text-right">Amount</TableHead>
+                    </TableRow>
+                </TableHeader>
+                <TableBody>
+                    {paginatedTransactions.map((transaction) => (
+                    <TableRow key={transaction.id}>
+                        <TableCell>
+                        <div className="font-medium">{transaction.description}</div>
+                        </TableCell>
+                        <TableCell className="hidden sm:table-cell">
+                        <Badge
+                            className="text-xs"
+                            variant={
+                            transaction.type === 'income' ? 'default' : 'secondary'
+                            }
+                            style={{
+                            backgroundColor:
+                                transaction.type === 'income'
+                                ? 'hsl(var(--primary))'
+                                : 'hsl(var(--accent))',
+                            color:
+                                transaction.type === 'income'
+                                ? 'hsl(var(--primary-foreground))'
+                                : 'hsl(var(--accent-foreground))',
+                            }}
+                        >
+                            {transaction.type}
+                        </Badge>
+                        </TableCell>
+                        <TableCell className="hidden md:table-cell">
+                            {transaction.category}
+                        </TableCell>
+                        <TableCell className="hidden sm:table-cell">
+                        {getDate(transaction.date).toLocaleDateString()}
+                        </TableCell>
+                        <TableCell
+                        className={`text-right font-medium ${
+                            transaction.type === 'income'
+                            ? 'text-green-600'
+                            : 'text-red-600'
+                        }`}
+                        >
+                        {transaction.type === 'income' ? '+' : '-'}
+                        {formatCurrency(transaction.amount)}
+                        </TableCell>
+                    </TableRow>
+                    ))}
+                </TableBody>
+                </Table>
+                <div className="flex justify-between items-center pt-4">
+                    <div className="text-xs text-muted-foreground">
+                        Showing <strong>{(currentPage - 1) * TRANSACTIONS_PER_PAGE + 1} - {Math.min(currentPage * TRANSACTIONS_PER_PAGE, filteredTransactions.length)}</strong> of <strong>{filteredTransactions.length}</strong> transactions
+                    </div>
+                    <div className="flex gap-2">
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                            disabled={currentPage === 1}
+                        >
+                            Previous
+                        </Button>
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                            disabled={currentPage === totalPages}
+                        >
+                            Next
+                        </Button>
+                    </div>
+                </div>
+            </>
+        ) : (
+             <div className="flex h-[400px] flex-col items-center justify-center gap-4 text-center">
+                <FileSearch className="h-16 w-16 text-muted" />
+                <div className="space-y-1">
+                <h3 className="font-semibold tracking-tight">No transactions found</h3>
+                <p className="text-sm text-muted-foreground">
+                    Add a transaction to get started.
+                </p>
+                </div>
             </div>
-            <div className="flex gap-2">
-                <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                    disabled={currentPage === 1}
-                >
-                    Previous
-                </Button>
-                <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-                    disabled={currentPage === totalPages}
-                >
-                    Next
-                </Button>
-            </div>
-        </div>
+        )}
       </CardContent>
     </Card>
   );
