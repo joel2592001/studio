@@ -16,7 +16,7 @@ import { Transaction, Goal } from '@/lib/types';
 
 // Define the input schema for the chat flow
 const ChatWithAdvisorInputSchema = z.object({
-  message: z.string().describe('The user\u2019s message to the advisor.'),
+  message: z.string().describe('The user’s message to the advisor.'),
   transactions: z.string().describe("A JSON string of the user's recent transactions."),
   goals: z.string().describe("A JSON string of the user's financial goals."),
   totalIncome: z.number().describe("The user's total income."),
@@ -40,7 +40,7 @@ const chatPrompt = ai.definePrompt({
   output: { schema: ChatWithAdvisorOutputSchema },
   prompt: `You are FinWise, a friendly and helpful AI financial chatbot. Your goal is to answer users' questions about their financial data.
   
-  IMPORTANT: Keep your answers very short, concise, and easy to understand. Use simple language. Avoid long paragraphs. Use bullet points if it makes the information clearer.
+  IMPORTANT: Keep your answers very short, concise, and easy to understand. Use simple language. Avoid long paragraphs. Use bullet points (using hyphens or asterisks) if it makes the information clearer. DO NOT use HTML tags like <ul> or <li>.
 
   Here is the user's financial data:
   - Total Income: {{{totalIncome}}}
