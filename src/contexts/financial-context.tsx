@@ -15,16 +15,16 @@ type Action =
 
 const initialState: State = {
   transactions: [
-    { id: '1', type: 'income', category: 'Salary', amount: 5000, date: new Date('2024-07-01'), description: 'Monthly Salary' },
-    { id: '2', type: 'expense', category: 'Groceries', amount: 150, date: new Date('2024-07-05'), description: 'Weekly grocery shopping' },
-    { id: '3', type: 'expense', category: 'Utilities', amount: 100, date: new Date('2024-07-10'), description: 'Electricity Bill' },
-    { id: '4', type: 'expense', category: 'Transport', amount: 60, date: new Date('2024-07-12'), description: 'Gasoline' },
-    { id: '5', type: 'income', category: 'Freelance', amount: 750, date: new Date('2024-07-15'), description: 'Web design project' },
-    { id: '6', type: 'expense', category: 'Dining Out', amount: 75, date: new Date('2024-07-18'), description: 'Dinner with friends' },
+    { id: '1', type: 'income', category: 'Salary', amount: 400000, date: new Date('2024-07-01'), description: 'Monthly Salary' },
+    { id: '2', type: 'expense', category: 'Groceries', amount: 12000, date: new Date('2024-07-05'), description: 'Weekly grocery shopping' },
+    { id: '3', type: 'expense', category: 'Utilities', amount: 8000, date: new Date('2024-07-10'), description: 'Electricity Bill' },
+    { id: '4', type: 'expense', category: 'Transport', amount: 5000, date: new Date('2024-07-12'), description: 'Gasoline' },
+    { id: '5', type: 'income', category: 'Freelance', amount: 60000, date: new Date('2024-07-15'), description: 'Web design project' },
+    { id: '6', type: 'expense', category: 'Dining Out', amount: 6000, date: new Date('2024-07-18'), description: 'Dinner with friends' },
   ],
   goals: [
-    { id: '1', name: 'Vacation to Hawaii', targetAmount: 4000, currentAmount: 1500, deadline: new Date('2025-06-01') },
-    { id: '2', name: 'New Laptop', targetAmount: 2000, currentAmount: 1800, deadline: new Date('2024-09-01') },
+    { id: '1', name: 'Vacation to Goa', targetAmount: 320000, currentAmount: 120000, deadline: new Date('2025-06-01') },
+    { id: '2', name: 'New Laptop', targetAmount: 160000, currentAmount: 144000, deadline: new Date('2024-09-01') },
   ],
 };
 

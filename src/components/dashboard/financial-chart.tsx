@@ -24,12 +24,12 @@ import {
 } from '@/components/ui/chart';
 
 const chartData = [
-  { month: 'January', desktop: 186, mobile: 80 },
-  { month: 'February', desktop: 305, mobile: 200 },
-  { month: 'March', desktop: 237, mobile: 120 },
-  { month: 'April', desktop: 73, mobile: 190 },
-  { month: 'May', desktop: 209, mobile: 130 },
-  { month: 'June', desktop: 214, mobile: 140 },
+  { month: 'January', desktop: 18600, mobile: 8000 },
+  { month: 'February', desktop: 30500, mobile: 20000 },
+  { month: 'March', desktop: 23700, mobile: 12000 },
+  { month: 'April', desktop: 7300, mobile: 19000 },
+  { month: 'May', desktop: 20900, mobile: 13000 },
+  { month: 'June', desktop: 21400, mobile: 14000 },
 ];
 
 const chartConfig = {
@@ -71,7 +71,7 @@ export function FinancialChart() {
               tickLine={false}
               axisLine={false}
               tickMargin={8}
-              tickFormatter={(value) => `$${value}`}
+              tickFormatter={(value) => `₹${Number(value) / 1000}k`}
             />
             <Tooltip content={<ChartTooltipContent indicator="dot" />} />
             <Area
