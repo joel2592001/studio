@@ -13,20 +13,26 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Logo } from '@/components/logo';
 import { useAuth } from '@/hooks/use-auth';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { FirebaseError } from 'firebase/app';
 
 export default function SignupPage() {
-  const { signup } = useAuth();
+  const { user, signup, loading: authLoading } = useAuth();
   const router = useRouter();
   const { toast } = useToast();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (!authLoading && user) {
+      router.push('/dashboard');
+    }
+  }, [user, authLoading, router]);
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,7 +44,7 @@ export default function SignupPage() {
         title: 'Account Created',
         description: "You've successfully signed up!",
       });
-      router.push('/dashboard');
+      // The useEffect will handle the redirection
     } catch (err) {
        if (err instanceof FirebaseError) {
         switch (err.code) {
@@ -58,11 +64,18 @@ export default function SignupPage() {
       } else {
         setError('An unexpected error occurred. Please try again later.');
       }
-    } finally {
       setLoading(false);
     }
   };
-
+  
+  if (authLoading || user) {
+    return (
+       <div className="flex h-screen w-screen flex-col items-center justify-center bg-background">
+        <Logo />
+        <p className="mt-4 text-muted-foreground">Loading...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background p-4">
