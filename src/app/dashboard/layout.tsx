@@ -3,8 +3,9 @@
 import { FinancialProvider } from '@/contexts/financial-context';
 import { Header } from '@/components/header';
 import { AiAdvisor } from '@/components/dashboard/ai-advisor';
+import withAuth from '@/components/with-auth';
 
-export default function DashboardLayout({
+function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
@@ -21,3 +22,5 @@ export default function DashboardLayout({
     </FinancialProvider>
   );
 }
+
+export default withAuth(DashboardLayout);
