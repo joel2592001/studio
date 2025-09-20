@@ -17,6 +17,7 @@ import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { FirebaseError } from 'firebase/app';
 
 export default function SignupPage() {
   const { signup } = useAuth();
@@ -39,7 +40,24 @@ export default function SignupPage() {
       });
       router.push('/dashboard');
     } catch (err) {
-      setError((err as Error).message);
+       if (err instanceof FirebaseError) {
+        switch (err.code) {
+          case 'auth/email-already-in-use':
+            setError('This email is already in use. Please log in instead.');
+            break;
+          case 'auth/weak-password':
+            setError('The password is too weak. Please choose a stronger password.');
+            break;
+          case 'auth/invalid-email':
+            setError('Please enter a valid email address.');
+            break;
+          default:
+            setError('An unexpected error occurred. Please try again later.');
+            break;
+        }
+      } else {
+        setError('An unexpected error occurred. Please try again later.');
+      }
     } finally {
       setLoading(false);
     }

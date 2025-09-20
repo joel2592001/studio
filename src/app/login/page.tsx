@@ -17,6 +17,7 @@ import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { FirebaseError } from 'firebase/app';
 
 export default function LoginPage() {
   const { login } = useAuth();
@@ -39,7 +40,24 @@ export default function LoginPage() {
       });
       router.push('/dashboard');
     } catch (err) {
-      setError((err as Error).message);
+      if (err instanceof FirebaseError) {
+        switch (err.code) {
+          case 'auth/user-not-found':
+            setError('No account found with this email. Please sign up.');
+            break;
+          case 'auth/wrong-password':
+            setError('Incorrect password. Please try again.');
+            break;
+          case 'auth/invalid-credential':
+             setError('Incorrect email or password. Please try again.');
+            break;
+          default:
+            setError('An unexpected error occurred. Please try again later.');
+            break;
+        }
+      } else {
+        setError('An unexpected error occurred. Please try again later.');
+      }
     } finally {
       setLoading(false);
     }
