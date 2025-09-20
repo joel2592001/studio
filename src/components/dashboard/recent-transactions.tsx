@@ -1,0 +1,105 @@
+'use client';
+
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import { Badge } from '@/components/ui/badge';
+import { useFinancials } from '@/contexts/financial-context';
+import { useMemo } from 'react';
+
+export function RecentTransactions() {
+  const { state } = useFinancials();
+
+  const recentTransactions = useMemo(() => {
+    return state.transactions
+      .sort((a, b) => b.date.getTime() - a.date.getTime())
+      .slice(0, 6);
+  }, [state.transactions]);
+
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+    }).format(amount);
+  };
+
+  return (
+    <Card className="shadow-md">
+      <CardHeader>
+        <CardTitle>Recent Transactions</CardTitle>
+        <CardDescription>
+          A list of your most recent income and expenses.
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Description</TableHead>
+              <TableHead className="hidden sm:table-cell">Type</TableHead>
+              <TableHead className="hidden sm:table-cell">Date</TableHead>
+              <TableHead className="text-right">Amount</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {recentTransactions.map((transaction) => (
+              <TableRow key={transaction.id}>
+                <TableCell>
+                  <div className="font-medium">{transaction.description}</div>
+                  <div className="hidden text-sm text-muted-foreground md:inline">
+                    {transaction.category}
+                  </div>
+                </TableCell>
+                <TableCell className="hidden sm:table-cell">
+                  <Badge
+                    className="text-xs"
+                    variant={
+                      transaction.type === 'income' ? 'default' : 'secondary'
+                    }
+                    style={{
+                      backgroundColor:
+                        transaction.type === 'income'
+                          ? 'hsl(var(--primary))'
+                          : 'hsl(var(--accent))',
+                      color:
+                        transaction.type === 'income'
+                          ? 'hsl(var(--primary-foreground))'
+                          : 'hsl(var(--accent-foreground))',
+                    }}
+                  >
+                    {transaction.type}
+                  </Badge>
+                </TableCell>
+                <TableCell className="hidden sm:table-cell">
+                  {transaction.date.toLocaleDateString()}
+                </TableCell>
+                <TableCell
+                  className={`text-right font-medium ${
+                    transaction.type === 'income'
+                      ? 'text-green-600'
+                      : 'text-red-600'
+                  }`}
+                >
+                  {transaction.type === 'income' ? '+' : '-'}
+                  {formatCurrency(transaction.amount)}
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </CardContent>
+    </Card>
+  );
+}
