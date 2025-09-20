@@ -26,11 +26,11 @@ function DashboardContent() {
             <RecentTransactions />
           </div>
           <div className="grid auto-rows-max items-start gap-4 md:gap-8">
-            <AiAdvisor />
             <TransactionForm />
           </div>
         </div>
       </main>
+      <AiAdvisor />
     </div>
   );
 }

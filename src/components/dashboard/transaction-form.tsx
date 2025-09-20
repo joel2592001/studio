@@ -36,7 +36,7 @@ import {
 import { useFinancials } from '@/contexts/financial-context';
 import { useToast } from '@/hooks/use-toast';
 import { useState } from 'react';
-import { Card, CardContent } from '../ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../ui/card';
 
 const formSchema = z.object({
   type: z.enum(['income', 'expense']),
@@ -98,7 +98,13 @@ export function TransactionForm() {
 
   return (
     <Card className="shadow-md">
-      <CardContent className="p-6">
+       <CardHeader>
+        <CardTitle>New Transaction</CardTitle>
+        <CardDescription>
+          Record your income or expenses to keep your finances up to date.
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
             <Button className="w-full">
