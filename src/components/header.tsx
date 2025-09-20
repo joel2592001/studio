@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { CircleUser, Menu, Search } from 'lucide-react';
+import { CircleUser, Menu, Search, PlusCircle } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -13,6 +13,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Logo } from '@/components/logo';
+import { TransactionForm } from './dashboard/transaction-form';
 
 export function Header() {
   return (
@@ -99,6 +100,7 @@ export function Header() {
             />
           </div>
         </form>
+        <TransactionForm />
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="secondary" size="icon" className="rounded-full">
