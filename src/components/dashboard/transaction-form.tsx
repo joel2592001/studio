@@ -11,7 +11,6 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Select,
@@ -21,7 +20,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { PlusCircle } from 'lucide-react';
+import { CalendarIcon, PlusCircle } from 'lucide-react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
@@ -36,14 +35,18 @@ import {
 import { useFinancials } from '@/contexts/financial-context';
 import { useToast } from '@/hooks/use-toast';
 import { useState } from 'react';
+import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
+import { cn } from '@/lib/utils';
+import { Calendar } from '../ui/calendar';
+import { format } from 'date-fns';
 
 const formSchema = z.object({
   type: z.enum(['income', 'expense']),
   amount: z.coerce.number().positive('Amount must be positive'),
   category: z.string().min(1, 'Category is required'),
   description: z.string().min(1, 'Description is required'),
-  date: z.string().refine((date) => !isNaN(Date.parse(date)), {
-    message: 'Invalid date',
+  date: z.date({
+    required_error: "A date is required.",
   }),
 });
 
@@ -71,20 +74,26 @@ export function TransactionForm() {
       amount: 0,
       category: '',
       description: '',
-      date: new Date().toISOString().split('T')[0],
+      date: new Date(),
     },
   });
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     dispatch({
       type: 'ADD_TRANSACTION',
-      payload: { ...values, id: crypto.randomUUID(), date: new Date(values.date) },
+      payload: { ...values, id: crypto.randomUUID() },
     });
     toast({
       title: 'Transaction Added',
       description: `Your ${values.type} has been successfully recorded.`,
     });
-    form.reset();
+    form.reset({
+      type: activeTab,
+      amount: 0,
+      category: activeTab === 'income' ? 'Salary' : '',
+      description: '',
+      date: new Date(),
+    });
     setOpen(false);
   }
 
@@ -103,7 +112,7 @@ export function TransactionForm() {
           Add Transaction
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Add a new transaction</DialogTitle>
           <DialogDescription>
@@ -111,13 +120,14 @@ export function TransactionForm() {
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
               <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="expense">Expense</TabsTrigger>
                 <TabsTrigger value="income">Income</TabsTrigger>
               </TabsList>
-              <div className="grid gap-4 py-4">
+            </Tabs>
+             <div className="space-y-4 p-1">
                 <FormField
                   control={form.control}
                   name="amount"
@@ -125,7 +135,7 @@ export function TransactionForm() {
                     <FormItem>
                       <FormLabel>Amount</FormLabel>
                       <FormControl>
-                        <Input type="number" placeholder="0.00" {...field} />
+                        <Input type="number" placeholder="₹0.00" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -137,7 +147,7 @@ export function TransactionForm() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Category</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <Select onValueChange={field.onChange} value={field.value}>
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue placeholder={`Select a ${activeTab} category`} />
@@ -179,17 +189,44 @@ export function TransactionForm() {
                   control={form.control}
                   name="date"
                   render={({ field }) => (
-                    <FormItem>
+                    <FormItem className="flex flex-col">
                       <FormLabel>Date</FormLabel>
-                      <FormControl>
-                        <Input type="date" {...field} />
-                      </FormControl>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                           <FormControl>
+                            <Button
+                              variant={"outline"}
+                              className={cn(
+                                "pl-3 text-left font-normal",
+                                !field.value && "text-muted-foreground"
+                              )}
+                            >
+                              {field.value ? (
+                                format(field.value, "PPP")
+                              ) : (
+                                <span>Pick a date</span>
+                              )}
+                              <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                            </Button>
+                          </FormControl>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                          <Calendar
+                            mode="single"
+                            selected={field.value}
+                            onSelect={field.onChange}
+                            disabled={(date) =>
+                              date > new Date() || date < new Date("1900-01-01")
+                            }
+                            initialFocus
+                          />
+                        </PopoverContent>
+                      </Popover>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
               </div>
-            </Tabs>
             <DialogFooter>
               <Button type="submit">Save transaction</Button>
             </DialogFooter>
