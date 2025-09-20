@@ -1,3 +1,4 @@
+
 'use client';
 
 import {
@@ -7,18 +8,20 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { useFinancials } from '@/contexts/financial-context';
 import { useMemo } from 'react';
 import { TrendingUp, TrendingDown, Wallet } from 'lucide-react';
+import { Transaction } from '@/lib/types';
 
-export function FinancialSummary() {
-  const { state } = useFinancials();
+type FinancialSummaryProps = {
+    transactions: Transaction[];
+};
 
+export function FinancialSummary({ transactions }: FinancialSummaryProps) {
   const { totalIncome, totalExpenses, savings, savingsRate } = useMemo(() => {
-    const income = state.transactions
+    const income = transactions
       .filter((t) => t.type === 'income')
       .reduce((acc, t) => acc + t.amount, 0);
-    const expenses = state.transactions
+    const expenses = transactions
       .filter((t) => t.type === 'expense')
       .reduce((acc, t) => acc + t.amount, 0);
     const currentSavings = income - expenses;
@@ -30,7 +33,7 @@ export function FinancialSummary() {
       savings: currentSavings,
       savingsRate: rate,
     };
-  }, [state.transactions]);
+  }, [transactions]);
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-IN', {

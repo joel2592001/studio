@@ -1,21 +1,26 @@
+
 'use client';
 
 import { useMemo } from 'react';
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { useFinancials } from '@/contexts/financial-context';
+import { Transaction } from '@/lib/types';
+
 
 const COLORS = [
   '#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', 
   '#82ca9d', '#ffc658', '#d0ed57', '#a4de6c', '#8dd1e1'
 ];
 
-export function ExpenseCategoryChart() {
-  const { state } = useFinancials();
+type ExpenseCategoryChartProps = {
+    transactions: Transaction[];
+};
+
+export function ExpenseCategoryChart({ transactions }: ExpenseCategoryChartProps) {
 
   const expenseData = useMemo(() => {
     const categoryTotals: { [key: string]: number } = {};
-    state.transactions
+    transactions
       .filter((t) => t.type === 'expense')
       .forEach((t) => {
         if (categoryTotals[t.category]) {
@@ -25,7 +30,7 @@ export function ExpenseCategoryChart() {
         }
       });
     return Object.entries(categoryTotals).map(([name, value]) => ({ name, value }));
-  }, [state.transactions]);
+  }, [transactions]);
   
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-IN', {
@@ -54,25 +59,31 @@ export function ExpenseCategoryChart() {
         <CardDescription>A breakdown of your spending habits.</CardDescription>
       </CardHeader>
       <CardContent>
-        <ResponsiveContainer width="100%" height={300}>
-          <PieChart>
-            <Pie
-              data={expenseData}
-              cx="50%"
-              cy="50%"
-              labelLine={false}
-              outerRadius={80}
-              fill="#8884d8"
-              dataKey="value"
-            >
-              {expenseData.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-              ))}
-            </Pie>
-            <Tooltip content={<CustomTooltip />} />
-            <Legend />
-          </PieChart>
-        </ResponsiveContainer>
+        {expenseData.length > 0 ? (
+          <ResponsiveContainer width="100%" height={300}>
+            <PieChart>
+              <Pie
+                data={expenseData}
+                cx="50%"
+                cy="50%"
+                labelLine={false}
+                outerRadius={80}
+                fill="#8884d8"
+                dataKey="value"
+              >
+                {expenseData.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                ))}
+              </Pie>
+              <Tooltip content={<CustomTooltip />} />
+              <Legend />
+            </PieChart>
+          </ResponsiveContainer>
+        ) : (
+          <div className="flex items-center justify-center h-[300px] text-muted-foreground">
+            No expense data for the selected period.
+          </div>
+        )}
       </CardContent>
     </Card>
   );
