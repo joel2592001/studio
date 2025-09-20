@@ -3,7 +3,6 @@
 import { FinancialProvider } from '@/contexts/financial-context';
 import { Header } from '@/components/header';
 import { AiAdvisor } from '@/components/dashboard/ai-advisor';
-import withAuth from '@/components/with-auth';
 
 function DashboardLayout({
   children,
@@ -23,4 +22,4 @@ function DashboardLayout({
   );
 }
 
-export default withAuth(DashboardLayout);
+export default DashboardLayout;
