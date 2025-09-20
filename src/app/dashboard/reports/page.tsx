@@ -1,6 +1,10 @@
-import { Header } from '@/components/header';
 
-export default function ReportsPage() {
+'use client'
+
+import { Header } from '@/components/header';
+import { FinancialProvider } from '@/contexts/financial-context';
+
+function ReportsContent() {
   return (
     <div className="flex min-h-screen w-full flex-col">
       <Header />
@@ -10,4 +14,12 @@ export default function ReportsPage() {
       </main>
     </div>
   );
+}
+
+export default function ReportsPage() {
+    return (
+        <FinancialProvider>
+            <ReportsContent />
+        </FinancialProvider>
+    )
 }

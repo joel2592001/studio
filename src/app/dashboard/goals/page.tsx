@@ -1,6 +1,10 @@
-import { Header } from '@/components/header';
 
-export default function GoalsPage() {
+'use client'
+
+import { Header } from '@/components/header';
+import { FinancialProvider } from '@/contexts/financial-context';
+
+function GoalsContent() {
   return (
     <div className="flex min-h-screen w-full flex-col">
       <Header />
@@ -10,4 +14,12 @@ export default function GoalsPage() {
       </main>
     </div>
   );
+}
+
+export default function GoalsPage() {
+    return (
+        <FinancialProvider>
+            <GoalsContent />
+        </FinancialProvider>
+    )
 }

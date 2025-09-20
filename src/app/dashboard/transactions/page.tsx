@@ -1,6 +1,10 @@
-import { Header } from '@/components/header';
 
-export default function TransactionsPage() {
+'use client'
+
+import { Header } from '@/components/header';
+import { FinancialProvider } from '@/contexts/financial-context';
+
+function TransactionsContent() {
   return (
     <div className="flex min-h-screen w-full flex-col">
       <Header />
@@ -9,5 +13,13 @@ export default function TransactionsPage() {
         <p>This page is under construction.</p>
       </main>
     </div>
+  )
+}
+
+export default function TransactionsPage() {
+  return (
+    <FinancialProvider>
+      <TransactionsContent />
+    </FinancialProvider>
   );
 }
