@@ -18,13 +18,21 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { useFinancials } from '@/contexts/financial-context';
 import { useMemo } from 'react';
+import { Timestamp } from 'firebase/firestore';
 
 export function RecentTransactions() {
   const { state } = useFinancials();
 
+  const getDate = (date: Date | Timestamp) => {
+    if (date instanceof Timestamp) {
+      return date.toDate();
+    }
+    return date;
+  }
+
   const recentTransactions = useMemo(() => {
     return state.transactions
-      .sort((a, b) => b.date.getTime() - a.date.getTime())
+      .sort((a, b) => getDate(b.date).getTime() - getDate(a.date).getTime())
       .slice(0, 6);
   }, [state.transactions]);
 
@@ -83,7 +91,7 @@ export function RecentTransactions() {
                   </Badge>
                 </TableCell>
                 <TableCell className="hidden sm:table-cell">
-                  {transaction.date.toLocaleDateString()}
+                  {getDate(transaction.date).toLocaleDateString()}
                 </TableCell>
                 <TableCell
                   className={`text-right font-medium ${

@@ -62,7 +62,7 @@ const expenseCategories = [
 ];
 
 export function TransactionForm() {
-  const { dispatch } = useFinancials();
+  const { addTransaction } = useFinancials();
   const { toast } = useToast();
   const [open, setOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<'income' | 'expense'>('expense');
@@ -78,23 +78,28 @@ export function TransactionForm() {
     },
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    dispatch({
-      type: 'ADD_TRANSACTION',
-      payload: { ...values, id: crypto.randomUUID() },
-    });
-    toast({
-      title: 'Transaction Added',
-      description: `Your ${values.type} has been successfully recorded.`,
-    });
-    form.reset({
-      type: activeTab,
-      amount: 0,
-      category: activeTab === 'income' ? 'Salary' : '',
-      description: '',
-      date: new Date(),
-    });
-    setOpen(false);
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    try {
+        await addTransaction(values);
+        toast({
+          title: 'Transaction Added',
+          description: `Your ${values.type} has been successfully recorded.`,
+        });
+        form.reset({
+          type: activeTab,
+          amount: 0,
+          category: activeTab === 'income' ? 'Salary' : '',
+          description: '',
+          date: new Date(),
+        });
+        setOpen(false);
+    } catch (error) {
+        toast({
+            variant: 'destructive',
+            title: 'Failed to add transaction',
+            description: (error as Error).message,
+        });
+    }
   }
 
   const handleTabChange = (value: string) => {

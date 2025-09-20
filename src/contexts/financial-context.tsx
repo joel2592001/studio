@@ -1,40 +1,45 @@
 'use client';
 
+import React, { createContext, useContext, useReducer, ReactNode, useEffect, useState } from 'react';
 import { type Transaction, type Goal } from '@/lib/types';
-import React, { createContext, useContext, useReducer, ReactNode } from 'react';
+import { useAuth } from '@/hooks/use-auth';
+import { getTransactions, addTransaction as addTransactionService } from '@/lib/transactions';
+import { getGoals, addGoal as addGoalService, updateGoal as updateGoalService } from '@/lib/goals';
+import { Logo } from '@/components/logo';
 
 type State = {
   transactions: Transaction[];
   goals: Goal[];
+  loading: boolean;
 };
 
 type Action =
+  | { type: 'SET_LOADING'; payload: boolean }
+  | { type: 'SET_TRANSACTIONS'; payload: Transaction[] }
   | { type: 'ADD_TRANSACTION'; payload: Transaction }
+  | { type: 'SET_GOALS'; payload: Goal[] }
   | { type: 'ADD_GOAL'; payload: Goal }
   | { type: 'UPDATE_GOAL'; payload: Goal };
 
 const initialState: State = {
-  transactions: [
-    { id: '1', type: 'income', category: 'Salary', amount: 400000, date: new Date('2024-07-01'), description: 'Monthly Salary' },
-    { id: '2', type: 'expense', category: 'Groceries', amount: 12000, date: new Date('2024-07-05'), description: 'Weekly grocery shopping' },
-    { id: '3', type: 'expense', category: 'Utilities', amount: 8000, date: new Date('2024-07-10'), description: 'Electricity Bill' },
-    { id: '4', type: 'expense', category: 'Transport', amount: 5000, date: new Date('2024-07-12'), description: 'Gasoline' },
-    { id: '5', type: 'income', category: 'Freelance', amount: 60000, date: new Date('2024-07-15'), description: 'Web design project' },
-    { id: '6', type: 'expense', category: 'Dining Out', amount: 6000, date: new Date('2024-07-18'), description: 'Dinner with friends' },
-  ],
-  goals: [
-    { id: '1', name: 'Vacation to Goa', targetAmount: 320000, currentAmount: 120000, deadline: new Date('2025-06-01') },
-    { id: '2', name: 'New Laptop', targetAmount: 160000, currentAmount: 144000, deadline: new Date('2024-09-01') },
-  ],
+  transactions: [],
+  goals: [],
+  loading: true,
 };
 
 function financialReducer(state: State, action: Action): State {
   switch (action.type) {
+    case 'SET_LOADING':
+        return { ...state, loading: action.payload };
+    case 'SET_TRANSACTIONS':
+      return { ...state, transactions: action.payload };
     case 'ADD_TRANSACTION':
       return {
         ...state,
         transactions: [action.payload, ...state.transactions],
       };
+    case 'SET_GOALS':
+        return { ...state, goals: action.payload };
     case 'ADD_GOAL':
       return {
         ...state,
@@ -55,13 +60,65 @@ function financialReducer(state: State, action: Action): State {
 const FinancialContext = createContext<{
   state: State;
   dispatch: React.Dispatch<Action>;
+  addTransaction: (transaction: Omit<Transaction, 'id' | 'uid'>) => Promise<void>;
+  addGoal: (goal: Omit<Goal, 'id' | 'uid'>) => Promise<void>;
+  updateGoal: (goal: Goal) => Promise<void>;
 } | null>(null);
 
 export const FinancialProvider = ({ children }: { children: ReactNode }) => {
   const [state, dispatch] = useReducer(financialReducer, initialState);
+  const { user } = useAuth();
+
+  useEffect(() => {
+    async function fetchData() {
+      if (user) {
+        try {
+          dispatch({ type: 'SET_LOADING', payload: true });
+          const [transactions, goals] = await Promise.all([
+            getTransactions(user.uid),
+            getGoals(user.uid)
+          ]);
+          dispatch({ type: 'SET_TRANSACTIONS', payload: transactions });
+          dispatch({ type: 'SET_GOALS', payload: goals });
+        } catch (error) {
+          console.error("Failed to fetch financial data:", error);
+        } finally {
+          dispatch({ type: 'SET_LOADING', payload: false });
+        }
+      }
+    }
+    fetchData();
+  }, [user]);
+
+  const addTransaction = async (transaction: Omit<Transaction, 'id' | 'uid'>) => {
+    if (!user) throw new Error("User not authenticated");
+    const newTransaction = await addTransactionService(user.uid, transaction);
+    dispatch({ type: 'ADD_TRANSACTION', payload: newTransaction });
+  };
+  
+  const addGoal = async (goal: Omit<Goal, 'id' | 'uid'>) => {
+    if (!user) throw new Error("User not authenticated");
+    const newGoal = await addGoalService(user.uid, goal);
+    dispatch({ type: 'ADD_GOAL', payload: newGoal });
+  };
+  
+  const updateGoal = async (goal: Goal) => {
+    if (!user) throw new Error("User not authenticated");
+    const updatedGoal = await updateGoalService(goal);
+    dispatch({ type: 'UPDATE_GOAL', payload: updatedGoal });
+  };
+
+  if (state.loading) {
+    return (
+        <div className="flex h-screen w-screen flex-col items-center justify-center bg-background">
+            <Logo />
+            <p className="mt-4 text-muted-foreground">Loading Financial Data...</p>
+        </div>
+    )
+  }
 
   return (
-    <FinancialContext.Provider value={{ state, dispatch }}>
+    <FinancialContext.Provider value={{ state, dispatch, addTransaction, addGoal, updateGoal }}>
       {children}
     </FinancialContext.Provider>
   );

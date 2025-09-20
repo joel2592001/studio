@@ -29,6 +29,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useFinancials } from '@/contexts/financial-context';
 import { ListFilter } from 'lucide-react';
+import { Timestamp } from 'firebase/firestore';
 
 const TRANSACTIONS_PER_PAGE = 10;
 
@@ -47,6 +48,13 @@ export function AllTransactions() {
     }).format(amount);
   };
 
+  const getDate = (date: Date | Timestamp) => {
+    if (date instanceof Timestamp) {
+      return date.toDate();
+    }
+    return date;
+  }
+
   const uniqueCategories = useMemo(() => {
     const categories = new Set(state.transactions.map((t) => t.category));
     return Array.from(categories);
@@ -59,7 +67,7 @@ export function AllTransactions() {
         const categoryMatch = filters.category.length === 0 || filters.category.includes(transaction.category);
         return typeMatch && categoryMatch;
       })
-      .sort((a, b) => b.date.getTime() - a.date.getTime());
+      .sort((a, b) => getDate(b.date).getTime() - getDate(a.date).getTime());
   }, [state.transactions, filters]);
 
   const totalPages = Math.ceil(filteredTransactions.length / TRANSACTIONS_PER_PAGE);
@@ -166,7 +174,7 @@ export function AllTransactions() {
                     {transaction.category}
                 </TableCell>
                 <TableCell className="hidden sm:table-cell">
-                  {transaction.date.toLocaleDateString()}
+                  {getDate(transaction.date).toLocaleDateString()}
                 </TableCell>
                 <TableCell
                   className={`text-right font-medium ${
@@ -209,4 +217,3 @@ export function AllTransactions() {
     </Card>
   );
 }
-

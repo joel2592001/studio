@@ -11,6 +11,7 @@ import {
 import { Progress } from '@/components/ui/progress';
 import { useFinancials } from '@/contexts/financial-context';
 import { useMemo } from 'react';
+import { Timestamp } from 'firebase/firestore';
 
 export function Goals() {
   const { state } = useFinancials();
@@ -23,6 +24,14 @@ export function Goals() {
       maximumFractionDigits: 0,
     }).format(amount);
   };
+
+  const getDate = (date: Date | Timestamp | undefined) => {
+    if (!date) return undefined;
+    if (date instanceof Timestamp) {
+      return date.toDate();
+    }
+    return date;
+  }
 
   const goalsWithProgress = useMemo(() => {
     return state.goals.map((goal) => ({
@@ -59,7 +68,7 @@ export function Goals() {
               </span>
               {goal.deadline && (
                  <span className="text-xs text-muted-foreground">
-                    Deadline: {new Date(goal.deadline).toLocaleDateString()}
+                    Deadline: {getDate(goal.deadline)!.toLocaleDateString()}
                  </span>
               )}
             </div>

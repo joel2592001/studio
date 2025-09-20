@@ -11,9 +11,10 @@ import {
 } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { useFinancials } from '@/contexts/financial-context';
-import { PlusCircle, Target } from 'lucide-react';
+import { Target } from 'lucide-react';
 import { useMemo } from 'react';
 import { GoalForm } from './goal-form';
+import { Timestamp } from 'firebase/firestore';
 
 export function AllGoals() {
   const { state } = useFinancials();
@@ -26,6 +27,14 @@ export function AllGoals() {
       maximumFractionDigits: 0,
     }).format(amount);
   };
+
+  const getDate = (date: Date | Timestamp | undefined) => {
+    if (!date) return undefined;
+    if (date instanceof Timestamp) {
+      return date.toDate();
+    }
+    return date;
+  }
 
   const goalsWithProgress = useMemo(() => {
     return state.goals.map((goal) => ({
@@ -73,7 +82,7 @@ export function AllGoals() {
                         </span>
                         {goal.deadline && (
                             <span className="text-xs text-muted-foreground">
-                                Deadline: {new Date(goal.deadline).toLocaleDateString()}
+                                Deadline: {getDate(goal.deadline)!.toLocaleDateString()}
                             </span>
                         )}
                         </div>

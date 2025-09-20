@@ -1,4 +1,3 @@
-
 'use client';
 
 import { Button } from '@/components/ui/button';
@@ -32,6 +31,7 @@ import { cn } from '@/lib/utils';
 import { Calendar } from '../ui/calendar';
 import { format } from 'date-fns';
 import { Goal } from '@/lib/types';
+import { Timestamp } from 'firebase/firestore';
 
 const formSchema = z.object({
   name: z.string().min(1, 'Goal name is required'),
@@ -45,15 +45,23 @@ type GoalFormProps = {
 }
 
 export function GoalForm({ goalToEdit }: GoalFormProps) {
-  const { dispatch } = useFinancials();
+  const { addGoal, updateGoal } = useFinancials();
   const { toast } = useToast();
   const [open, setOpen] = useState(false);
+
+  const getGoalDate = (date: Date | Timestamp | undefined) => {
+    if (!date) return undefined;
+    if (date instanceof Timestamp) {
+      return date.toDate();
+    }
+    return date;
+  }
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: goalToEdit ? {
         ...goalToEdit,
-        deadline: goalToEdit.deadline ? new Date(goalToEdit.deadline) : undefined,
+        deadline: getGoalDate(goalToEdit.deadline),
     } : {
       name: '',
       targetAmount: 0,
@@ -62,29 +70,31 @@ export function GoalForm({ goalToEdit }: GoalFormProps) {
     },
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    if (goalToEdit) {
-        dispatch({
-            type: 'UPDATE_GOAL',
-            payload: { ...goalToEdit, ...values },
-        });
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    try {
+        if (goalToEdit) {
+            await updateGoal({ ...goalToEdit, ...values });
+            toast({
+                title: 'Goal Updated',
+                description: `Your goal "${values.name}" has been updated.`,
+            });
+        } else {
+            await addGoal(values);
+            toast({
+              title: 'Goal Added',
+              description: `Your new goal "${values.name}" has been set.`,
+            });
+        }
+        
+        form.reset();
+        setOpen(false);
+    } catch(error) {
         toast({
-            title: 'Goal Updated',
-            description: `Your goal "${values.name}" has been updated.`,
-        });
-    } else {
-        dispatch({
-          type: 'ADD_GOAL',
-          payload: { ...values, id: crypto.randomUUID() },
-        });
-        toast({
-          title: 'Goal Added',
-          description: `Your new goal "${values.name}" has been set.`,
+            variant: 'destructive',
+            title: `Failed to ${goalToEdit ? 'update' : 'add'} goal`,
+            description: (error as Error).message,
         });
     }
-    
-    form.reset();
-    setOpen(false);
   }
 
   return (
@@ -200,4 +210,3 @@ export function GoalForm({ goalToEdit }: GoalFormProps) {
     </Dialog>
   );
 }
-
