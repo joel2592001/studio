@@ -4,97 +4,9 @@ import React, { createContext, useContext, useReducer, ReactNode, useState } fro
 import { type Transaction, type Goal } from '@/lib/types';
 import { Logo } from '@/components/logo';
 
-const staticTransactions: Transaction[] = [
-    {
-        id: '1',
-        uid: 'static',
-        type: 'income',
-        category: 'Salary',
-        amount: 50000,
-        date: new Date('2024-05-01'),
-        description: 'Monthly Salary'
-    },
-    {
-        id: '2',
-        uid: 'static',
-        type: 'expense',
-        category: 'Groceries',
-        amount: 4500,
-        date: new Date('2024-05-05'),
-        description: 'Weekly grocery shopping'
-    },
-    {
-        id: '3',
-        uid: 'static',
-        type: 'expense',
-        category: 'Utilities',
-        amount: 2000,
-        date: new Date('2024-05-06'),
-        description: 'Electricity Bill'
-    },
-    {
-        id: '4',
-        uid: 'static',
-        type: 'expense',
-        category: 'Dining Out',
-        amount: 1500,
-        date: new Date('2024-05-07'),
-        description: 'Dinner with friends'
-    },
-    {
-        id: '5',
-        uid: 'static',
-        type: 'expense',
-        category: 'Transport',
-        amount: 1200,
-        date: new Date('2024-05-10'),
-        description: 'Monthly metro pass'
-    },
-    {
-        id: '6',
-        uid: 'static',
-        type: 'income',
-        category: 'Freelance',
-        amount: 10000,
-        date: new Date('2024-05-12'),
-        description: 'Freelance project payment'
-    },
-    {
-        id: '7',
-        uid: 'static',
-        type: 'expense',
-        category: 'Entertainment',
-        amount: 800,
-        date: new Date('2024-05-15'),
-        description: 'Movie tickets'
-    }
-];
+const staticTransactions: Transaction[] = [];
 
-const staticGoals: Goal[] = [
-    {
-        id: 'g1',
-        uid: 'static',
-        name: 'Vacation to Goa',
-        targetAmount: 50000,
-        currentAmount: 15000,
-        deadline: new Date('2024-12-31')
-    },
-    {
-        id: 'g2',
-        uid: 'static',
-        name: 'New Laptop',
-        targetAmount: 120000,
-        currentAmount: 80000,
-        deadline: new Date('2024-09-30')
-    },
-    {
-        id: 'g3',
-        uid: 'static',
-        name: 'Emergency Fund',
-        targetAmount: 200000,
-        currentAmount: 150000,
-    }
-];
+const staticGoals: Goal[] = [];
 
 
 type State = {
